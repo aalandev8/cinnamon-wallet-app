@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AccountCard } from "@/components/app/AccountCard";
+import { ActivityList } from "@/components/app/ActivityList";
 import { SendPanel } from "@/components/app/SendPanel";
 import { SignerPanel } from "@/components/app/SignerPanel";
 
@@ -16,6 +17,7 @@ export default function AppPage() {
       <SignerPanel />
       <AccountCard />
       <SendPanel />
+      <ActivityList />
     </main>
   );
 }
