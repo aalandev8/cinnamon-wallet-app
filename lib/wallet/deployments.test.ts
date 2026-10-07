@@ -18,7 +18,8 @@ describe("parseDeployments", () => {
   });
 
   it("throws naming a missing key", () => {
-    const { factory: _omit, ...rest } = valid;
+    const rest: Record<string, string> = { ...valid };
+    delete rest.factory;
     expect(() => parseDeployments(rest)).toThrow(/"factory".*missing/);
   });
 
