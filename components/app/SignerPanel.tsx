@@ -1,42 +1,20 @@
 "use client";
 
-import { useMemo, useState, useSyncExternalStore, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { Button } from "@/components/Button";
 import { KeyIcon } from "@/components/icons";
+import { notifySignerChange, useSignerKey } from "@/components/app/useWallet";
 import {
-  SIGNER_STORAGE_KEY,
   getBrowserStorage,
-  loadSignerKey,
   normalizePrivateKey,
   removeSignerKey,
   saveSignerKey,
 } from "@/lib/wallet/signer";
 import type { Hex } from "viem";
 
-const listeners = new Set<() => void>();
-
-function notify() {
-  listeners.forEach((listener) => listener());
-}
-
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  const onStorage = (event: StorageEvent) => {
-    if (event.key === SIGNER_STORAGE_KEY || event.key === null) listener();
-  };
-  window.addEventListener("storage", onStorage);
-  return () => {
-    listeners.delete(listener);
-    window.removeEventListener("storage", onStorage);
-  };
-}
-
-const getSnapshot = () => loadSignerKey(getBrowserStorage());
-const getServerSnapshot = () => null;
-
 export function SignerPanel() {
-  const privateKey = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const privateKey = useSignerKey();
   const address = useMemo(() => (privateKey ? privateKeyToAccount(privateKey).address : null), [privateKey]);
   const [importValue, setImportValue] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +26,7 @@ export function SignerPanel() {
     }
     setError(null);
     setImportValue("");
-    notify();
+    notifySignerChange();
   }
 
   function onImport(event: FormEvent<HTMLFormElement>) {
@@ -64,7 +42,7 @@ export function SignerPanel() {
     if (!window.confirm("Delete the signer key from this browser? This cannot be undone.")) return;
     removeSignerKey(getBrowserStorage());
     setError(null);
-    notify();
+    notifySignerChange();
   }
 
   return (
