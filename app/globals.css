@@ -1,26 +1,232 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Dark mode follows the OS by default; [data-theme] on <html> forces a theme. */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *) {
+      @slot;
+    }
   }
 }
 
+:root {
+  color-scheme: light;
+
+  /* Brand palette */
+  --cinnamon: #7b3f1e;
+  --spice: #c4662f;
+  --spice-strong: #a9521f; /* AA (5.3:1) with white text */
+  --caramel: #e8a25c;
+  --dough: #fff4e6;
+  --glaze: #fffdf8;
+  --strawberry: #f5a3b5;
+  --mint: #9ed9c3;
+  --cherry: #e0574f;
+
+  /* Semantic roles */
+  --bg: var(--dough);
+  --surface: var(--glaze);
+  --surface-sunken: #fbe9d3;
+  --text: var(--cinnamon);
+  --text-muted: #8a5a3c; /* AA on dough and glaze */
+  --outline: var(--cinnamon);
+  --primary: var(--spice-strong);
+  --primary-hover: #93461a;
+  --on-primary: #ffffff;
+  --highlight: var(--caramel);
+  --blush: var(--strawberry);
+  --on-blush: #5c2a14;
+  --success: var(--mint);
+  --on-success: #1f5a45;
+  --success-ink: #2e6f57; /* success text on page surfaces */
+  --danger: var(--cherry);
+  --on-danger: #ffffff;
+  --danger-ink: #b23a33; /* error text on page surfaces, AA */
+  --focus: var(--spice-strong);
+
+  /* Brown-tinted shadows, never grey */
+  --shadow-color: 123 63 30;
+  --elev-soft: 0 2px 0 rgb(var(--shadow-color) / 0.12), 0 8px 24px -8px rgb(var(--shadow-color) / 0.25);
+  --elev-pillow: 0 4px 0 rgb(var(--shadow-color) / 0.18), 0 16px 40px -12px rgb(var(--shadow-color) / 0.3);
+  --elev-press: 0 1px 0 rgb(var(--shadow-color) / 0.2);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #2a1810;
+  --surface: #3a2418;
+  --surface-sunken: #23140d;
+  --text: #fff4e6;
+  --text-muted: #e3c9ae;
+  --outline: rgb(232 162 92 / 0.4);
+  --primary: #e8a25c;
+  --primary-hover: #f0b678;
+  --on-primary: #2a1810;
+  --highlight: #e8a25c;
+  --blush: #f5a3b5;
+  --on-blush: #2a1810;
+  --success: #9ed9c3;
+  --on-success: #12352a;
+  --success-ink: #9ed9c3;
+  --danger: #f08a83;
+  --on-danger: #2a1810;
+  --danger-ink: #f5a09a;
+  --focus: #e8a25c;
+  --shadow-color: 18 8 3; /* deep brown, never grey */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #2a1810;
+    --surface: #3a2418;
+    --surface-sunken: #23140d;
+    --text: #fff4e6;
+    --text-muted: #e3c9ae;
+    --outline: rgb(232 162 92 / 0.4);
+    --primary: #e8a25c;
+    --primary-hover: #f0b678;
+    --on-primary: #2a1810;
+    --highlight: #e8a25c;
+    --blush: #f5a3b5;
+    --on-blush: #2a1810;
+    --success: #9ed9c3;
+    --on-success: #12352a;
+    --success-ink: #9ed9c3;
+    --danger: #f08a83;
+    --on-danger: #2a1810;
+    --danger-ink: #f5a09a;
+    --focus: #e8a25c;
+    --shadow-color: 18 8 3; /* deep brown, never grey */
+  }
+}
+
+@theme inline {
+  --color-cinnamon: var(--cinnamon);
+  --color-spice: var(--spice);
+  --color-caramel: var(--caramel);
+  --color-dough: var(--dough);
+  --color-glaze: var(--glaze);
+  --color-strawberry: var(--strawberry);
+  --color-mint: var(--mint);
+  --color-cherry: var(--cherry);
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-outline: var(--outline);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-on-primary: var(--on-primary);
+  --color-highlight: var(--highlight);
+  --color-blush: var(--blush);
+  --color-on-blush: var(--on-blush);
+  --color-success: var(--success);
+  --color-on-success: var(--on-success);
+  --color-success-ink: var(--success-ink);
+  --color-danger: var(--danger);
+  --color-on-danger: var(--on-danger);
+  --color-danger-ink: var(--danger-ink);
+  --color-focus: var(--focus);
+
+  --font-display: var(--font-fredoka);
+  --font-sans: var(--font-nunito);
+  --font-mono: var(--font-jetbrains-mono);
+
+  --radius-card: 28px;
+  --radius-pill: 20px;
+  --radius-chip: 999px;
+
+  --shadow-soft: var(--elev-soft);
+  --shadow-pillow: var(--elev-pillow);
+  --shadow-press: var(--elev-press);
+
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@utility outline-cel {
+  border: 2px solid var(--outline);
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Mascot crossfade + spring bounce */
+@keyframes mascot-in {
+  0% { opacity: 0; transform: scale(0.92) translateY(6px); }
+  60% { opacity: 1; transform: scale(1.04) translateY(-3px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes mascot-out {
+  to { opacity: 0; transform: scale(0.96); }
+}
+.mascot-in { animation: mascot-in 450ms var(--ease-spring) both; }
+.mascot-out { animation: mascot-out 300ms ease-out both; }
+
+/* Hero swirls */
+@keyframes swirl-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-14px) rotate(25deg); }
+}
+.swirl { animation: swirl-float 10s ease-in-out infinite; }
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px) scale(0.98);
+  transition: opacity 600ms ease-out, transform 700ms var(--ease-spring);
+}
+.reveal[data-shown="true"] { opacity: 1; transform: none; }
+
+/* Hero entrance */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+.rise { animation: rise 700ms var(--ease-spring) both; }
+
+/* Idle mascot float */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.float { animation: float 5s ease-in-out infinite; }
+
+/* Card hover wiggle */
+.card-pop { transition: transform 400ms var(--ease-spring), box-shadow 300ms ease-out; }
+.card-pop:hover { transform: translateY(-6px) rotate(-0.6deg); }
+.card-pop:hover .icon-bob { transform: rotate(-8deg) scale(1.08); }
+.icon-bob { transition: transform 400ms var(--ease-spring); }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; }
+  .card-pop:hover, .card-pop:hover .icon-bob { transform: none; }
 }
