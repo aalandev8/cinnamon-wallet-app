@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AccountCard } from "@/components/app/AccountCard";
+import { SendPanel } from "@/components/app/SendPanel";
 import { SignerPanel } from "@/components/app/SignerPanel";
 
 export const metadata: Metadata = {
@@ -14,6 +15,7 @@ export default function AppPage() {
       </h1>
       <SignerPanel />
       <AccountCard />
+      <SendPanel />
     </main>
   );
 }
