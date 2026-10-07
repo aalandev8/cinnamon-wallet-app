@@ -27,21 +27,21 @@ describe("execute modes", () => {
 
 describe("encodeExecuteCalls", () => {
   it("encodes a single call with packed (to, value, data)", () => {
-    const data = encodeExecuteCalls([{ to: TO, value: 5n, data: "0xabcd" }]);
+    const data = encodeExecuteCalls([{ to: TO, value: BigInt(5), data: "0xabcd" }]);
     const { functionName, args } = decodeFunctionData({ abi: walletAbi, data });
     expect(functionName).toBe("execute");
-    expect(args).toEqual([CALLTYPE_SINGLE_MODE, encodePacked(["address", "uint256", "bytes"], [TO, 5n, "0xabcd"])]);
+    expect(args).toEqual([CALLTYPE_SINGLE_MODE, encodePacked(["address", "uint256", "bytes"], [TO, BigInt(5), "0xabcd"])]);
   });
 
   it("defaults value to 0 and data to 0x", () => {
     const data = encodeExecuteCalls([{ to: TO }]);
     const { args } = decodeFunctionData({ abi: walletAbi, data });
-    expect(args?.[1]).toBe(encodePacked(["address", "uint256", "bytes"], [TO, 0n, "0x"]));
+    expect(args?.[1]).toBe(encodePacked(["address", "uint256", "bytes"], [TO, BigInt(0), "0x"]));
   });
 
   it("encodes multiple calls as a batch of executions", () => {
     const data = encodeExecuteCalls([
-      { to: TO, value: 1n },
+      { to: TO, value: BigInt(1) },
       { to: OWNER, data: "0x12" },
     ]);
     const { args } = decodeFunctionData({ abi: walletAbi, data });
@@ -60,8 +60,8 @@ describe("encodeExecuteCalls", () => {
       args?.[1] as `0x${string}`,
     );
     expect(executions).toEqual([
-      { target: TO, value: 1n, callData: "0x" },
-      { target: OWNER, value: 0n, callData: "0x12" },
+      { target: TO, value: BigInt(1), callData: "0x" },
+      { target: OWNER, value: BigInt(0), callData: "0x12" },
     ]);
   });
 });
@@ -77,10 +77,10 @@ describe("buildFactoryArgs", () => {
   });
 
   it("passes extra modules and salt through", () => {
-    const module = spendingLimitHookModule(HOOK, 10n);
+    const hookModule = spendingLimitHookModule(HOOK, BigInt(10));
     const salt = `0x${"ab".repeat(32)}` as const;
-    const args = buildFactoryArgs({ owner: OWNER, rootValidator: VALIDATOR, extraModules: [module], salt });
-    expect(args[2]).toEqual([module]);
+    const args = buildFactoryArgs({ owner: OWNER, rootValidator: VALIDATOR, extraModules: [hookModule], salt });
+    expect(args[2]).toEqual([hookModule]);
     expect(args[3]).toBe(salt);
   });
 });
@@ -96,10 +96,10 @@ describe("encodeFactoryData", () => {
 
 describe("spendingLimitHookModule", () => {
   it("builds a hook module with the daily limit as init data", () => {
-    expect(spendingLimitHookModule(HOOK, 7n)).toEqual({
+    expect(spendingLimitHookModule(HOOK, BigInt(7))).toEqual({
       moduleType: MODULE_TYPE_HOOK,
       moduleAddress: HOOK,
-      initData: encodeAbiParameters([{ type: "uint256" }], [7n]),
+      initData: encodeAbiParameters([{ type: "uint256" }], [BigInt(7)]),
     });
   });
 });
