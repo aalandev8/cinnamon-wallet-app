@@ -1,12 +1,15 @@
 "use client";
 
-import { useReducer, useState, type FormEvent } from "react";
+import { useEffect, useReducer, useState, type FormEvent } from "react";
+import type { Address } from "viem";
 import { BaseError } from "viem";
 import { Button } from "@/components/Button";
 import { Mascot, type MascotState } from "@/components/Mascot";
 import { bundlerClient } from "@/lib/wallet/clients";
 import { initialSendState, parseEthAmount, sendReducer, validateRecipient } from "@/lib/wallet/send";
-import { notifyAccountChange, useWallet } from "./useWallet";
+import { DAILY_LIMIT_MESSAGE, DEFAULT_DAILY_LIMIT, decodeDailyLimitError } from "@/lib/wallet/spendingLimit";
+import { SpendingLimitBar } from "./SpendingLimitBar";
+import { notifyAccountChange, useAccountVersion, useWallet } from "./useWallet";
 
 const mascotByStatus: Record<string, MascotState> = {
   idle: "idle",
@@ -19,11 +22,23 @@ const inputClass = "rounded-chip bg-surface-sunken px-3 py-2 font-mono text-sm o
 
 export function SendPanel() {
   const { account } = useWallet();
+  const version = useAccountVersion();
+  const [address, setAddress] = useState<{ account: unknown; value: Address } | null>(null);
   const [state, dispatch] = useReducer(sendReducer, initialSendState);
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const sending = state.status === "sending";
+  const accountAddress = address && address.account === account ? address.value : null;
+
+  useEffect(() => {
+    if (!account) return;
+    let cancelled = false;
+    void account.getAddress().then((value) => !cancelled && setAddress({ account, value }));
+    return () => {
+      cancelled = true;
+    };
+  }, [account]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -43,9 +58,16 @@ export function SendPanel() {
       dispatch({ type: "submitted", userOpHash });
       const receipt = await bundlerClient.waitForUserOperationReceipt({ hash: userOpHash });
       dispatch({ type: "confirmed", txHash: receipt.receipt.transactionHash, success: receipt.success });
+      if (!receipt.success && decodeDailyLimitError(receipt.reason ?? null)) {
+        dispatch({ type: "error", message: DAILY_LIMIT_MESSAGE });
+      }
       notifyAccountChange();
     } catch (error) {
-      const message = error instanceof BaseError ? error.shortMessage : (error as Error).message;
+      const message = decodeDailyLimitError(error)
+        ? DAILY_LIMIT_MESSAGE
+        : error instanceof BaseError
+          ? error.shortMessage
+          : (error as Error).message;
       dispatch({ type: "error", message });
     }
   }
@@ -61,6 +83,12 @@ export function SendPanel() {
         </h2>
         <Mascot state={mascotByStatus[state.status]} size={72} />
       </div>
+
+      {accountAddress && (
+        <div className="mt-6">
+          <SpendingLimitBar address={accountAddress} version={version} fallbackLimit={DEFAULT_DAILY_LIMIT} />
+        </div>
+      )}
 
       <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-3">
         <label htmlFor="send-to" className="text-sm font-semibold text-muted">

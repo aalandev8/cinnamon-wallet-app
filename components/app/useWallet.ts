@@ -5,6 +5,7 @@ import type { Hex, LocalAccount } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { createCinnamonAccount } from "@/lib/wallet/account";
 import type { CinnamonAccount } from "@/lib/wallet/cinnamonAccount";
+import { DEFAULT_DAILY_LIMIT } from "@/lib/wallet/spendingLimit";
 import { SIGNER_STORAGE_KEY, getBrowserStorage, loadSignerKey } from "@/lib/wallet/signer";
 
 const listeners = new Set<() => void>();
@@ -56,7 +57,7 @@ export function useWallet(): WalletState {
   useEffect(() => {
     if (!owner) return;
     let cancelled = false;
-    createCinnamonAccount({ owner }).then(
+    createCinnamonAccount({ owner, dailyLimit: DEFAULT_DAILY_LIMIT }).then(
       (account) => !cancelled && setResult({ owner, account, error: null }),
       (err: unknown) =>
         !cancelled &&
