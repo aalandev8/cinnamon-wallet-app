@@ -6,7 +6,7 @@ import { Button } from "@/components/Button";
 import { Mascot, type MascotState } from "@/components/Mascot";
 import { bundlerClient } from "@/lib/wallet/clients";
 import { initialSendState, parseEthAmount, sendReducer, validateRecipient } from "@/lib/wallet/send";
-import { useWallet } from "./useWallet";
+import { notifyAccountChange, useWallet } from "./useWallet";
 
 const mascotByStatus: Record<string, MascotState> = {
   idle: "idle",
@@ -43,6 +43,7 @@ export function SendPanel() {
       dispatch({ type: "submitted", userOpHash });
       const receipt = await bundlerClient.waitForUserOperationReceipt({ hash: userOpHash });
       dispatch({ type: "confirmed", txHash: receipt.receipt.transactionHash, success: receipt.success });
+      notifyAccountChange();
     } catch (error) {
       const message = error instanceof BaseError ? error.shortMessage : (error as Error).message;
       dispatch({ type: "error", message });
