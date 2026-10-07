@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { Address } from "viem";
 import { Button } from "@/components/Button";
 import { ShieldIcon } from "@/components/icons";
-import { useWallet } from "@/components/app/useWallet";
+import { useAccountVersion, useWallet } from "@/components/app/useWallet";
 import { computeFundedBalance, formatEthBalance, isDeployedCode, toRpcQuantity } from "@/lib/wallet/accountStatus";
 import { publicClient } from "@/lib/wallet/clients";
 
@@ -24,6 +24,7 @@ function message(err: unknown, fallback: string) {
 
 export function AccountCard() {
   const { owner, account, error: accountError } = useWallet();
+  const version = useAccountVersion();
   const [status, setStatus] = useState<Status | null>(null);
   const [loading, setLoading] = useState(false);
   const [funding, setFunding] = useState(false);
@@ -45,7 +46,7 @@ export function AccountCard() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- async fetch on account change
     void refresh();
-  }, [refresh]);
+  }, [refresh, version]);
 
   async function onFund() {
     if (!status) return;

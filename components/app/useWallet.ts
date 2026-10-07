@@ -70,3 +70,24 @@ export function useWallet(): WalletState {
   const current = owner && result?.owner === owner ? result : null;
   return { owner, account: current?.account ?? null, error: current?.error ?? null };
 }
+
+let accountVersion = 0;
+const accountListeners = new Set<() => void>();
+
+/** Signals that on-chain account state changed (e.g. after a send) so views refetch. */
+export function notifyAccountChange() {
+  accountVersion += 1;
+  accountListeners.forEach((listener) => listener());
+}
+
+function subscribeAccount(listener: () => void) {
+  accountListeners.add(listener);
+  return () => {
+    accountListeners.delete(listener);
+  };
+}
+
+/** A counter that increments on every notifyAccountChange(). */
+export function useAccountVersion(): number {
+  return useSyncExternalStore(subscribeAccount, () => accountVersion, () => 0);
+}
