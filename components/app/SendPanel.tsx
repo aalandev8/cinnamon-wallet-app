@@ -9,6 +9,7 @@ import { bundlerClient } from "@/lib/wallet/clients";
 import { initialSendState, parseEthAmount, sendReducer, validateRecipient } from "@/lib/wallet/send";
 import { DAILY_LIMIT_MESSAGE, DEFAULT_DAILY_LIMIT, decodeDailyLimitError } from "@/lib/wallet/spendingLimit";
 import { SpendingLimitBar } from "./SpendingLimitBar";
+import { activityStore } from "./useActivity";
 import { notifyAccountChange, useAccountVersion, useWallet } from "./useWallet";
 
 const mascotByStatus: Record<string, MascotState> = {
@@ -49,6 +50,8 @@ export function SendPanel() {
     if (!account) return setFormError("Set up a signer first.");
     setFormError(null);
     dispatch({ type: "submit" });
+    const id = crypto.randomUUID();
+    activityStore.dispatch({ type: "started", id, amount: value.value, recipient: to.value });
     try {
       // When the account is not yet deployed, viem fills factory/factoryData from account.getFactoryArgs().
       const userOpHash = await bundlerClient.sendUserOperation({
@@ -56,10 +59,13 @@ export function SendPanel() {
         calls: [{ to: to.value, value: value.value }],
       });
       dispatch({ type: "submitted", userOpHash });
+      activityStore.dispatch({ type: "submitted", id, userOpHash });
       const receipt = await bundlerClient.waitForUserOperationReceipt({ hash: userOpHash });
       dispatch({ type: "confirmed", txHash: receipt.receipt.transactionHash, success: receipt.success });
+      activityStore.dispatch({ type: "confirmed", id, txHash: receipt.receipt.transactionHash, success: receipt.success });
       if (!receipt.success && decodeDailyLimitError(receipt.reason ?? null)) {
         dispatch({ type: "error", message: DAILY_LIMIT_MESSAGE });
+        activityStore.dispatch({ type: "failed", id, error: DAILY_LIMIT_MESSAGE });
       }
       notifyAccountChange();
     } catch (error) {
@@ -69,6 +75,7 @@ export function SendPanel() {
           ? error.shortMessage
           : (error as Error).message;
       dispatch({ type: "error", message });
+      activityStore.dispatch({ type: "failed", id, error: message });
     }
   }
 
