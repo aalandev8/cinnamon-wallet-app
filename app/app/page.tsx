@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AccountCard } from "@/components/app/AccountCard";
 import { SignerPanel } from "@/components/app/SignerPanel";
 
 export const metadata: Metadata = {
@@ -12,6 +13,7 @@ export default function AppPage() {
         Your wallet
       </h1>
       <SignerPanel />
+      <AccountCard />
     </main>
   );
 }
